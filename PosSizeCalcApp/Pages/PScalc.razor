@@ -17,10 +17,10 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudNumericField @bind-Value="AccountSize" Label="Account Size" Variant="Variant.Text"></MudNumericField>
-        <MudNumericField @bind-Value="AssetPrice" Label="Asset Price" Variant="Variant.Text"></MudNumericField>
-        <MudNumericField @bind-Value="Stoploss" Label="Stoploss" Variant="Variant.Text" Min="0" Max="1" Step=".05M"></MudNumericField>
-        <MudNumericField @bind-Value="Risk" Label="Risk" Variant="Variant.Text" Min="0" Max="1" Step=".05M" ></MudNumericField>
+        <MudNumericField @bind-Value="AccountSize" Label="Account Size" Variant="Variant.Text" Step="1.00M" Format="N2"></MudNumericField>
+        <MudNumericField @bind-Value="AssetPrice" Label="Asset Price" Variant="Variant.Text" Format="N2"></MudNumericField>
+        <MudNumericField @bind-Value="Stoploss" Label="Stoploss" Variant="Variant.Text" Step=".05M" Format="N2"></MudNumericField>
+        <MudNumericField @bind-Value="Risk" Label="Risk" Variant="Variant.Text" Step=".05M" Format="N2"></MudNumericField>
         <br />
         <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Add data</MudButton>
     </MudCardContent>
@@ -49,16 +49,16 @@ OnCommitEditClick="@(() => Snackbar.Add("Edit Saved"))"
     </HeaderContent>
     <RowEditingTemplate>
         <MudTd DataLabel="AccountSize">
-            <MudNumericField @bind-Value="@context.AccountSize" Required />
+            <MudNumericField @bind-Value="@context.AccountSize" Required Format="N2"/>
         </MudTd>
         <MudTd DataLabel="AssetPrice">
-            <MudNumericField @bind-Value="@context.AssetPrice" Required />
+            <MudNumericField @bind-Value="@context.AssetPrice" Required Format="N2"/>
         </MudTd>
         <MudTd DataLabel="Stoploss">
-            <MudNumericField @bind-Value="@context.Stoploss" Required Min="0" Max="1" Step=".05M"/>
+            <MudNumericField @bind-Value="@context.Stoploss" Required Step=".05M" Format="N2"/>
         </MudTd>
         <MudTd DataLabel="Risk">
-            <MudNumericField @bind-Value="@context.Risk" Required Min="0" Max="1" Step=".05M"/>
+            <MudNumericField @bind-Value="@context.Risk" Required Step=".05M" Format="N2"/>
         </MudTd>
         <MudTd DataLabel="PosSizeDollar">
             <MudTextField Format="N3" @bind-Value="@context.PosSizeDollar" ReadOnly />
