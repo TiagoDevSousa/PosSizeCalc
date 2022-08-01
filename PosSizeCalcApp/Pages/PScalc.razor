@@ -2,27 +2,27 @@
 
 <PageTitle>pscalc</PageTitle>
 
-<h1>Calculator</h1>
+<h1>Position Size Calculator</h1>
 
 
 
 <MudCard Elevation="25">
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">Add / Edit data</MudText>
+            <MudText Typo="Typo.h6">Add data</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudNumericField @bind-Value="data.AccountSize" Label="Account Size" Variant="Variant.Text" ></MudNumericField>
-        <MudNumericField @bind-Value="data.AssetPrice" Label="Asset Price" Variant="Variant.Text"  ></MudNumericField>
-        <MudNumericField @bind-Value="data.Risk" Label="Risk" Variant="Variant.Text"   ></MudNumericField>
-        <MudNumericField @bind-Value="data.Stoploss" Label="Stoploss" Variant="Variant.Text"  ></MudNumericField>
+        <MudNumericField @bind-Value="AccountSize" Label="Account Size" Variant="Variant.Text"></MudNumericField>
+        <MudNumericField @bind-Value="AssetPrice" Label="Asset Price" Variant="Variant.Text"></MudNumericField>
+        <MudNumericField @bind-Value="Stoploss" Label="Stoploss" Variant="Variant.Text" Min="0" Max="1" Step=".05M"></MudNumericField>
+        <MudNumericField @bind-Value="Risk" Label="Risk" Variant="Variant.Text" Min="0" Max="1" Step=".05M" ></MudNumericField>
         <br />
-        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save data</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Add data</MudButton>
     </MudCardContent>
 </MudCard>
 <br />
-<MudTable Elevation="25" Items="GetData()"  @bind-Value="data">
+<MudTable Elevation="25" Items="GetData()" @bind-Value="data">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Data</MudText>
         <MudSpacer />
@@ -30,65 +30,73 @@
     <HeaderContent>
         <MudTh>Account Size</MudTh>
         <MudTh>Asset Price</MudTh>
-        <MudTh>Risk</MudTh>
         <MudTh>Stoploss</MudTh>
+        <MudTh>Risk</MudTh>
         <MudTh>PosSizeDollar</MudTh>
         <MudTh>AssetAmount</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="AccountSize">@context.AccountSize</MudTd>
         <MudTd DataLabel="AssetPrice">@context.AssetPrice</MudTd>
-        <MudTd DataLabel="Risk">@context.Risk</MudTd>
         <MudTd DataLabel="Stoploss">@context.Stoploss</MudTd>
-
-        <MudTd DataLabel="Pos Size Dollar">@context.PosSizeDollar</MudTd>
-        <MudTd DataLabel="Asset Amount">@context.AssetAmount</MudTd>
-       
+        <MudTd DataLabel="Risk">@context.Risk</MudTd>
+        <MudTd Style="background-color:lightskyblue; font-weight:bold" DataLabel="Pos Size Dollar">@context.PosSizeDollar</MudTd>
+        <MudTd Style="background-color:lightskyblue; font-weight:bold" DataLabel="Asset Amount">@context.AssetAmount</MudTd>
     </RowTemplate>
 </MudTable>
 
-@code{
-    public decimal DecimalValue { get; set; }
+@code {
+    public decimal AccountSize { get; set; }
+    public decimal AssetPrice { get; set; }
+    public decimal Risk { get; set; }
+    public decimal Stoploss { get; set; }
 
-    public string searchString = "";
-    public Data data = new Data();
-    public List<Data> dataList = new List<Data>();
+    public DataPos data = new DataPos();
+    public List<DataPos> dataPosList = new List<DataPos>();
     protected override async Task OnInitializedAsync()
     {
         GetData();
     }
 
 
-    public List<Data> GetData()
+    public List<DataPos> GetData()
     {
         if (data != null)
         {
-            return dataList;
+            return dataPosList;
         }
         else
         {
-            return new List<Data>();
+            return new List<DataPos>();
         }
 
     }
 
     public void Save()
     {
-        dataList.Add(data);
+        dataPosList.Add(
+            new DataPos
+                {
+                    AccountSize = AccountSize,
+                    AssetPrice = AssetPrice,
+                    Risk = Risk,
+                    Stoploss = Stoploss
+                }
+        );
 
         GetData();
     }
 
 
-    public class Data
+    public class DataPos
     {
-        public double AccountSize { get; set; }
-        public double AssetPrice { get; set; }
-        public double Stoploss { get; set; }
-        public double Risk { get; set; }
+        public decimal AccountSize;
+        public decimal AssetPrice;
+        public decimal Stoploss;
+        public decimal Risk;
 
-        public double PosSizeDollar { get { return AccountSize * Stoploss / Risk; } set { } }
-        public double AssetAmount { get { return PosSizeDollar / AssetPrice; } set { } }
+        public decimal PosSizeDollar { get { return AccountSize * Risk / Stoploss; } set { } }
+        public decimal AssetAmount { get { return PosSizeDollar / AssetPrice; } set { } }
     }
 }
 
