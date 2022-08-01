@@ -1,5 +1,9 @@
 ﻿@page "/pscalc"
 
+@using System.Net.Http.Json
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+
 <PageTitle>pscalc</PageTitle>
 
 <h1>Position Size Calculator</h1>
@@ -21,8 +25,16 @@
         <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Add data</MudButton>
     </MudCardContent>
 </MudCard>
+
 <br />
-<MudTable Elevation="25" Items="GetData()" @bind-Value="data">
+
+<MudTable Elevation="25" Items="GetData()" @bind-Value="data"
+        @bind-SelectedItem="selectedItem1"
+          RowEditPreview="BackupItem"
+          RowEditCancel="ResetItemToOriginalValues"
+CanCancelEdit = "true"
+OnCommitEditClick="@(() => Snackbar.Add("Edit Saved"))"
+>
     <ToolBarContent>
         <MudText Typo="Typo.h6">Data</MudText>
         <MudSpacer />
@@ -35,21 +47,53 @@
         <MudTh>PosSizeDollar</MudTh>
         <MudTh>AssetAmount</MudTh>
     </HeaderContent>
+    <RowEditingTemplate>
+        <MudTd DataLabel="AccountSize">
+            <MudNumericField @bind-Value="@context.AccountSize" Required />
+        </MudTd>
+        <MudTd DataLabel="AssetPrice">
+            <MudNumericField @bind-Value="@context.AssetPrice" Required />
+        </MudTd>
+        <MudTd DataLabel="Stoploss">
+            <MudNumericField @bind-Value="@context.Stoploss" Required Min="0" Max="1" Step=".05M"/>
+        </MudTd>
+        <MudTd DataLabel="Risk">
+            <MudNumericField @bind-Value="@context.Risk" Required Min="0" Max="1" Step=".05M"/>
+        </MudTd>
+        <MudTd DataLabel="PosSizeDollar">
+            <MudTextField Format="N3" @bind-Value="@context.PosSizeDollar" ReadOnly />
+        </MudTd>
+         <MudTd DataLabel="AssetAmount">
+            <MudTextField Format="N3" @bind-Value="@context.AssetAmount" ReadOnly />
+        </MudTd>
+    </RowEditingTemplate>
     <RowTemplate>
         <MudTd DataLabel="AccountSize">@context.AccountSize</MudTd>
         <MudTd DataLabel="AssetPrice">@context.AssetPrice</MudTd>
         <MudTd DataLabel="Stoploss">@context.Stoploss</MudTd>
         <MudTd DataLabel="Risk">@context.Risk</MudTd>
-        <MudTd Style="background-color:lightskyblue; font-weight:bold" DataLabel="Pos Size Dollar">@context.PosSizeDollar</MudTd>
-        <MudTd Style="background-color:lightskyblue; font-weight:bold" DataLabel="Asset Amount">@context.AssetAmount</MudTd>
+        <MudTd DataLabel="Pos Size Dollar" Style="background-color:lightskyblue; font-weight:bold">
+            @context.PosSizeDollar
+        </MudTd>
+        <MudTd DataLabel="Pos Size Dollar" Style="background-color:lightskyblue; font-weight:bold">
+            @context.AssetAmount
+        </MudTd>
     </RowTemplate>
 </MudTable>
+
+@*<MudText Inline="true">Selected1: @selectedItem1?.Name</MudText>*@
 
 @code {
     public decimal AccountSize { get; set; }
     public decimal AssetPrice { get; set; }
     public decimal Risk { get; set; }
     public decimal Stoploss { get; set; }
+
+    private DataPos selectedItem1 = null;
+    private DataPos elementBeforeEdit;
+    private HashSet<DataPos> selectedItems1 = new HashSet<DataPos>();
+
+    private IEnumerable<DataPos> Elements = new List<DataPos>();
 
     public DataPos data = new DataPos();
     public List<DataPos> dataPosList = new List<DataPos>();
@@ -85,6 +129,8 @@
         );
 
         GetData();
+
+        Snackbar.Add("New row added");
     }
 
 
@@ -95,8 +141,34 @@
         public decimal Stoploss;
         public decimal Risk;
 
-        public decimal PosSizeDollar { get { return AccountSize * Risk / Stoploss; } set { } }
-        public decimal AssetAmount { get { return PosSizeDollar / AssetPrice; } set { } }
+        public decimal PosSizeDollar { get { return Math.Round(AccountSize * Risk / Stoploss, 3); } set { } }
+        public decimal AssetAmount { get { return Math.Round(PosSizeDollar / AssetPrice, 3); } set { } }
     }
+
+
+
+    private void BackupItem(object element)
+    {
+        elementBeforeEdit = new()
+        {
+            AccountSize = ((DataPos)element).AccountSize,
+            AssetPrice = ((DataPos)element).AssetPrice,
+            Stoploss = ((DataPos)element).Stoploss,
+            Risk = ((DataPos)element).Risk
+        };
+    }
+
+
+
+    private void ResetItemToOriginalValues(object element)
+    {
+        ((DataPos)element).AccountSize = elementBeforeEdit.AccountSize;
+        ((DataPos)element).AssetPrice = elementBeforeEdit.AssetPrice;
+        ((DataPos)element).Stoploss = elementBeforeEdit.Stoploss;
+        ((DataPos)element).Risk = elementBeforeEdit.Risk;
+        Snackbar.Add("Edit row cancelled");
+    }
+
+  
 }
 
